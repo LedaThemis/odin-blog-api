@@ -29,3 +29,9 @@ export function post_comments_get(req: Request, res: Response) {
         message: 'NOT IMPLEMENTED',
     });
 }
+
+export function create_comment_post(req: Request, res: Response) {
+    res.json({
+        message: 'NOT IMPLEMENTED',
+    });
+}
