@@ -10,14 +10,19 @@ interface IPost {
     updatedAt: Date;
 }
 
-const postSchema = new Schema<IPost>({
-    title: { type: String, required: true },
-    author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    content: { type: String, required: true },
-    comments: { type: [Schema.Types.ObjectId], ref: 'Comment', required: true },
-    isPublished: { type: Boolean, required: true },
-    createdAt: { type: Date, required: true },
-    updatedAt: { type: Date, required: true },
-});
+const postSchema = new Schema<IPost>(
+    {
+        title: { type: String, required: true },
+        author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        content: { type: String, required: true },
+        comments: {
+            type: [Schema.Types.ObjectId],
+            ref: 'Comment',
+            required: true,
+        },
+        isPublished: { type: Boolean, required: true },
+    },
+    { timestamps: true },
+);
 
 export default model('Post', postSchema);
