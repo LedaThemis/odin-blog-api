@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import logger from 'morgan';
 
 import indexRouter from './routes/index';
+import usersRouter from './routes/users';
 
 dotenv.config();
 
@@ -25,5 +26,6 @@ app.use(express.urlencoded({ extended: false }));
 
 // Routes
 app.use('/', indexRouter);
+app.use('/users', usersRouter);
 
 export default app;
