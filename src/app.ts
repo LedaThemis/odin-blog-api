@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import mongoose from 'mongoose';
 import logger from 'morgan';
 
+import commentsRouter from './routes/comments';
 import indexRouter from './routes/index';
 import postsRouter from './routes/posts';
 import usersRouter from './routes/users';
@@ -29,5 +30,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/', indexRouter);
 app.use('/posts', postsRouter);
 app.use('/users', usersRouter);
+app.use('/comments', commentsRouter);
 
 export default app;
