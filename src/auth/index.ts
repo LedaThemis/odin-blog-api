@@ -11,7 +11,7 @@ export default new Strategy(
         secretOrKey: process.env.SECRET_KEY,
     },
     (jwt_payload: { username: string; iat: number }, done) => {
-        console.log(jwt_payload);
+
         User.findOne(
             { username: jwt_payload.username },
             {},
