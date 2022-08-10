@@ -30,7 +30,7 @@ export function post_comments_get(req: Request, res: Response) {
     });
 }
 
-export function create_comment_post(req: Request, res: Response) {
+export function post_comment_create(req: Request, res: Response) {
     res.json({
         message: 'NOT IMPLEMENTED',
     });

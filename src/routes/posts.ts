@@ -20,6 +20,6 @@ router.delete('/:postId', postsController.post_delete);
 router.get('/:postId/comments', postsController.post_comments_get);
 
 // Create post comment
-router.post('/:postId/comments', postsController.create_comment_post);
+router.post('/:postId/comments', postsController.post_comment_create);
 
 export default router;
