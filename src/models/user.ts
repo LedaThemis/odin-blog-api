@@ -4,6 +4,7 @@ import { Model, Schema, model } from 'mongoose';
 interface IUser {
     username: string;
     password: string;
+    isAdmin?: boolean;
 }
 
 interface IUserMethods {
@@ -15,6 +16,7 @@ type UserModel = Model<IUser, never, IUserMethods>;
 const userSchema = new Schema<IUser, UserModel, IUserMethods>({
     username: { type: String, required: true },
     password: { type: String, required: true },
+    isAdmin: { type: String, required: false },
 });
 
 userSchema.pre('save', async function (next) {
