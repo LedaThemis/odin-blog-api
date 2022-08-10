@@ -23,3 +23,9 @@ export function post_delete(req: Request, res: Response) {
         message: 'NOT IMPLEMENTED',
     });
 }
+
+export function post_comments_get(req: Request, res: Response) {
+    res.json({
+        message: 'NOT IMPLEMENTED',
+    });
+}

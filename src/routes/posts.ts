@@ -16,4 +16,7 @@ router.put('/:postId', postsController.post_update);
 // Delete post
 router.delete('/:postId', postsController.post_delete);
 
+// Get post comments
+router.get('/:postId/comments', postsController.post_comments_get);
+
 export default router;
