@@ -16,7 +16,7 @@ type UserModel = Model<IUser, never, IUserMethods>;
 const userSchema = new Schema<IUser, UserModel, IUserMethods>({
     username: { type: String, required: true },
     password: { type: String, required: true },
-    isAdmin: { type: String, required: false },
+    isAdmin: { type: Boolean, required: false },
 });
 
 userSchema.pre('save', async function (next) {
