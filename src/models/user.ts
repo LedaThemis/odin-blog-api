@@ -19,7 +19,7 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>({
     isAdmin: { type: Boolean, required: false },
 });
 
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', function (next) {
     if (!this.isModified('password')) return next();
 
     bcrypt.hash(this.password, 10, (err, hashedPassword) => {
