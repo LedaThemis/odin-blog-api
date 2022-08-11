@@ -53,16 +53,39 @@ export const user_register = [
     },
 ];
 
+export async function user_login(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    const { username, password }: AccessBody = req.body;
 
-export function user_register(req: Request, res: Response) {
-    res.json({
-        message: 'NOT IMPLEMENTED',
-    });
-}
+    const userExists = await User.exists({ username });
 
-export function user_login(req: Request, res: Response) {
-    res.json({
-        message: 'NOT IMPLEMENTED',
+    if (!userExists) {
+        return res.status(401).json({
+            message:
+                'There is no account registered with the provided username',
+        });
+    }
+
+    // Check if username, password match
+    User.findOne({ username }, {}, {}, async (err, user) => {
+        if (err) return next(err);
+
+        if (await user?.comparePassword(password)) {
+            const token = jwt.sign({ username }, process.env.SECRET_KEY, {
+                expiresIn: process.env.JWT_EXPIRES_IN,
+            });
+
+            return res.json({
+                token,
+            });
+        } else {
+            return res.status(401).json({
+                message: 'Password is incorrect',
+            });
+        }
     });
 }
 
