@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
+import { Types } from 'mongoose';
 import passport from 'passport';
 
 import Post from '../models/post';
@@ -39,11 +40,53 @@ export const post_create = [
     },
 ];
 
-export function post_get(req: Request, res: Response) {
-    res.json({
-        message: 'NOT IMPLEMENTED',
-    });
-}
+export const post_get = [
+    async (req: Request, res: Response, next: NextFunction) => {
+        if (!Types.ObjectId.isValid(req.params.postId)) {
+            return res.sendStatus(400);
+        }
+
+        passport.authenticate(
+            'jwt',
+            { session: false },
+            async (err, currentUser) => {
+                if (err) return next(err);
+
+                let post;
+
+                // No current user
+                if (!currentUser) {
+                    try {
+                        post = await Post.findOne({
+                            _id: req.params.postId,
+                            isPublished: true,
+                        });
+                    } catch (err) {
+                        return next(err);
+                    }
+                } else {
+                    try {
+                        post = await Post.findOne({
+                            _id: req.params.postId,
+                            author: currentUser?.id,
+                        });
+                        console.log(currentUser?.id);
+                    } catch (err) {
+                        return next(err);
+                    }
+                }
+
+                if (!post) {
+                    return res.sendStatus(404);
+                } else {
+                    return res.json({
+                        post,
+                    });
+                }
+            },
+        )(req, res, next);
+    },
+];
 
 export function post_update(req: Request, res: Response) {
     res.json({
