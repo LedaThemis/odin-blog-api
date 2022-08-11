@@ -19,8 +19,9 @@ const postSchema = new Schema<IPost>(
             type: [Schema.Types.ObjectId],
             ref: 'Comment',
             required: true,
+            default: [],
         },
-        isPublished: { type: Boolean, required: true },
+        isPublished: { type: Boolean, required: true, default: false },
     },
     { timestamps: true },
 );
