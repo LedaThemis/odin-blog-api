@@ -111,6 +111,12 @@ export const post_update = [
         .trim()
         .isLength({ min: 32 })
         .escape(),
+    body('isPublished', 'isPublished must be either true or false')
+        .optional()
+        .custom((value) => value === 'true' || value === 'false')
+        .toBoolean()
+        .isBoolean()
+        .escape(),
     validateErrors,
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -127,6 +133,10 @@ export const post_update = [
 
             if (req.body.content) {
                 post.content = req.body.content;
+            }
+
+            if (req.body.isPublished) {
+                post.isPublished = req.body.isPublished;
             }
 
             // Update post
