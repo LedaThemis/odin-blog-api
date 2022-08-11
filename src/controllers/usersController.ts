@@ -2,11 +2,21 @@ import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import { CustomValidator, body, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
+import { Types } from 'mongoose';
 import passport from 'passport';
 
+import Post from '../models/post';
 import User from '../models/user';
 
 dotenv.config();
+
+const validUserId = (req: Request, res: Response, next: NextFunction) => {
+    if (!Types.ObjectId.isValid(req.params.userId)) {
+        return res.sendStatus(400);
+    }
+
+    next();
+};
 
 interface AccessBody {
     username: string;
@@ -96,11 +106,52 @@ export function user_get(req: Request, res: Response) {
 }
 
 export const user_posts_get = [
-    passport.authenticate('jwt', { session: false }),
-    (req: Request, res: Response) => {
-        res.json({
-            message: 'NOT IMPLEMENTED',
-            user: req.user,
-        });
+    validUserId,
+    (req: Request, res: Response, next: NextFunction) => {
+        passport.authenticate(
+            'jwt',
+            { session: false },
+            async (err, currentUser) => {
+                if (err) return next(err);
+
+                try {
+                    const postsAuthor = await User.findById(req.params.userId);
+
+                    if (!postsAuthor) {
+                        return res.sendStatus(404);
+                    }
+
+                    let posts;
+
+                    console.log({ postsAuthor, currentUser });
+                    console.log({
+                        bool:
+                            currentUser &&
+                            currentUser.id.toString() ===
+                                postsAuthor._id.toString(),
+                    });
+
+                    if (
+                        currentUser &&
+                        currentUser.id.toString() === postsAuthor._id.toString()
+                    ) {
+                        posts = await Post.find({
+                            author: postsAuthor?._id,
+                        });
+                    } else {
+                        posts = await Post.find({
+                            author: postsAuthor?._id,
+                            isPublished: true,
+                        });
+                    }
+
+                    return res.json({
+                        posts,
+                    });
+                } catch (err) {
+                    return next(err);
+                }
+            },
+        )(req, res, next);
     },
 ];
