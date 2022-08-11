@@ -197,8 +197,45 @@ export function post_comments_get(req: Request, res: Response) {
     });
 }
 
-export function post_comment_create(req: Request, res: Response) {
-    res.json({
-        message: 'NOT IMPLEMENTED',
-    });
-}
+export const post_comment_create = [
+    validPostId,
+    passport.authenticate('jwt', { session: false }),
+    body('content', 'Content must not be empty.')
+        .trim()
+        .isLength({ min: 1 })
+        .escape(),
+    validateErrors,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const post = await Post.findById(req.params.postId);
+
+            if (!post) {
+                return res.sendStatus(404);
+            }
+
+            if (
+                post?.isPublished ||
+                post?.author.toString() === req.user?.id.toString()
+            ) {
+                const comment = new Comment({
+                    author: req.user?.id,
+                    content: req.body.content,
+                });
+
+                const savedComment = await comment.save();
+
+                post.comments.push(savedComment._id);
+
+                await post.save();
+
+                return res.json({
+                    comment: savedComment,
+                });
+            } else {
+                return res.sendStatus(404);
+            }
+        } catch (err) {
+            return next(err);
+        }
+    },
+];
