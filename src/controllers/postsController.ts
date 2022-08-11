@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator';
 import { Types } from 'mongoose';
 import passport from 'passport';
 
+import Comment from '../models/comment';
 import Post from '../models/post';
 
 const validPostId = (req: Request, res: Response, next: NextFunction) => {
@@ -146,11 +147,39 @@ export const post_update = [
     },
 ];
 
-export function post_delete(req: Request, res: Response) {
-    res.json({
-        message: 'NOT IMPLEMENTED',
-    });
-}
+export const post_delete = [
+    validPostId,
+    passport.authenticate('jwt', { session: false }),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const post = await Post.findById(req.params.postId);
+
+            if (!post) {
+                return res.sendStatus(404);
+            }
+
+            if (req.user?.id.toString() === post.author.toString()) {
+                // delete post comments
+                await Promise.all(
+                    post.comments.map((commentId) =>
+                        Comment.findByIdAndDelete(commentId),
+                    ),
+                );
+
+                // delete post
+                await post.deleteOne();
+
+                return res.sendStatus(200);
+            } else if (post.isPublished) {
+                return res.sendStatus(403);
+            } else {
+                return res.sendStatus(404);
+            }
+        } catch (err) {
+            return next(err);
+        }
+    },
+];
 
 export function post_comments_get(req: Request, res: Response) {
     res.json({
