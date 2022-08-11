@@ -7,6 +7,12 @@ declare global {
             JWT_EXPIRES_IN: string;
         }
     }
+
+    namespace Express {
+        interface User {
+            id: string;
+        }
+    }
 }
 
 export {};

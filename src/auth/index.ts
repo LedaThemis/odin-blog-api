@@ -10,21 +10,15 @@ export default new Strategy(
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         secretOrKey: process.env.SECRET_KEY,
     },
-    (jwt_payload: { username: string; iat: number }, done) => {
+    (jwt_payload: { id: string; iat: number }, done) => {
+        User.findById(jwt_payload.id, {}, {}, (err, user) => {
+            if (err) return done(err, false);
 
-        User.findOne(
-            { username: jwt_payload.username },
-            {},
-            {},
-            (err, user) => {
-                if (err) return done(err, false);
-
-                if (user) {
-                    return done(null, { username: user.username });
-                } else {
-                    return done(null, false);
-                }
-            },
-        );
+            if (user) {
+                return done(null, { id: user._id });
+            } else {
+                return done(null, false);
+            }
+        });
     },
 );

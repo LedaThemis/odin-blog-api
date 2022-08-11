@@ -74,7 +74,7 @@ export async function user_login(
         if (err) return next(err);
 
         if (await user?.comparePassword(password)) {
-            const token = jwt.sign({ username }, process.env.SECRET_KEY, {
+            const token = jwt.sign({ id: user?._id }, process.env.SECRET_KEY, {
                 expiresIn: process.env.JWT_EXPIRES_IN,
             });
 
@@ -95,8 +95,12 @@ export function user_get(req: Request, res: Response) {
     });
 }
 
-export function user_posts_get(req: Request, res: Response) {
-    res.json({
-        message: 'NOT IMPLEMENTED',
-    });
-}
+export const user_posts_get = [
+    passport.authenticate('jwt', { session: false }),
+    (req: Request, res: Response) => {
+        res.json({
+            message: 'NOT IMPLEMENTED',
+            user: req.user,
+        });
+    },
+];
