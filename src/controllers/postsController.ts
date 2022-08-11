@@ -70,7 +70,6 @@ export const post_get = [
                             _id: req.params.postId,
                             author: currentUser?.id,
                         });
-                        console.log(currentUser?.id);
                     } catch (err) {
                         return next(err);
                     }
