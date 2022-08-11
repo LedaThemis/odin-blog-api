@@ -5,6 +5,26 @@ import passport from 'passport';
 
 import Post from '../models/post';
 
+const validPostId = (req: Request, res: Response, next: NextFunction) => {
+    if (!Types.ObjectId.isValid(req.params.postId)) {
+        return res.sendStatus(400);
+    }
+
+    next();
+};
+
+const validateErrors = (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            errors: errors.array(),
+        });
+    }
+
+    next();
+};
+
 export const post_create = [
     passport.authenticate('jwt', { session: false }),
     body('title', 'Title must not be empty.')
@@ -15,20 +35,13 @@ export const post_create = [
         .trim()
         .isLength({ min: 32 })
         .escape(),
+    validateErrors,
     async (req: Request, res: Response, next: NextFunction) => {
         const post = new Post({
             title: req.body.title,
             author: req.user?.id,
             content: req.body.content,
         });
-
-        const errors = validationResult(req);
-
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array(),
-            });
-        }
 
         post.save((err, savedPost) => {
             if (err) return next(err);
@@ -41,11 +54,8 @@ export const post_create = [
 ];
 
 export const post_get = [
+    validPostId,
     async (req: Request, res: Response, next: NextFunction) => {
-        if (!Types.ObjectId.isValid(req.params.postId)) {
-            return res.sendStatus(400);
-        }
-
         passport.authenticate(
             'jwt',
             { session: false },
@@ -87,11 +97,54 @@ export const post_get = [
     },
 ];
 
-export function post_update(req: Request, res: Response) {
-    res.json({
-        message: 'NOT IMPLEMENTED',
-    });
-}
+export const post_update = [
+    validPostId,
+    passport.authenticate('jwt', { session: false }),
+    body('title', 'Title must not be empty.')
+        .optional()
+        .trim()
+        .isLength({ min: 1 })
+        .escape(),
+    body('content', 'Content must be 32 characters or more.')
+        .optional()
+        .trim()
+        .isLength({ min: 32 })
+        .escape(),
+    validateErrors,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const post = await Post.findById(req.params.postId);
+
+            if (!post) {
+                return res.sendStatus(404);
+            }
+
+            // Update post
+            if (req.body.title) {
+                post.title = req.body.title;
+            }
+
+            if (req.body.content) {
+                post.content = req.body.content;
+            }
+
+            // Update post
+            if (req.user?.id.toString() === post.author.toString()) {
+                const updatedPost = await post.save();
+
+                return res.json({
+                    post: updatedPost,
+                });
+            } else if (post.isPublished) {
+                return res.sendStatus(403);
+            } else {
+                return res.sendStatus(404);
+            }
+        } catch (err) {
+            return next(err);
+        }
+    },
+];
 
 export function post_delete(req: Request, res: Response) {
     res.json({
