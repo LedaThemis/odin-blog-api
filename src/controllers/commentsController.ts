@@ -66,8 +66,31 @@ export const comment_update = [
     },
 ];
 
-export function comment_delete(req: Request, res: Response) {
-    res.json({
-        message: 'NOT IMPLEMENTED',
-    });
-}
+export const comment_delete = [
+    validCommentId,
+    passport.authenticate('jwt', { session: false }),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const comment = await Comment.findById(req.params.commentId);
+
+            if (!comment) {
+                return res.sendStatus(404);
+            }
+
+            const currentUser = await User.findById(req.user?.id);
+
+            if (
+                req.user?.id.toString() === comment.author.toString() ||
+                (currentUser && currentUser.isAdmin)
+            ) {
+                await comment.deleteOne();
+
+                return res.sendStatus(200);
+            } else {
+                return res.sendStatus(403);
+            }
+        } catch (err) {
+            return next(err);
+        }
+    },
+];
