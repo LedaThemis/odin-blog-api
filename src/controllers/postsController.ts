@@ -191,11 +191,47 @@ export const post_delete = [
     },
 ];
 
-export function post_comments_get(req: Request, res: Response) {
-    res.json({
-        message: 'NOT IMPLEMENTED',
-    });
-}
+export const post_comments_get = [
+    validPostId,
+    (req: Request, res: Response, next: NextFunction) => {
+        passport.authenticate(
+            'jwt',
+            { session: false },
+            async (err, currentUser) => {
+                if (err) return next(err);
+
+                try {
+                    const post = await Post.findById(req.params.postId);
+
+                    if (!post) {
+                        return res.sendStatus(404);
+                    }
+
+                    if (
+                        post.isPublished ||
+                        (currentUser &&
+                            currentUser.id.toString() ===
+                                post.author.toString())
+                    ) {
+                        const comments = await Promise.all(
+                            post.comments.map((commentId) =>
+                                Comment.findById(commentId),
+                            ),
+                        );
+
+                        return res.json({
+                            comments,
+                        });
+                    } else {
+                        return res.sendStatus(404);
+                    }
+                } catch (err) {
+                    return next(err);
+                }
+            },
+        )(req, res, next);
+    },
+];
 
 export const post_comment_create = [
     validPostId,
