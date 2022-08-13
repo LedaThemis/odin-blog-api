@@ -86,8 +86,14 @@ export const user_login = [
 
         if (!userExists) {
             return res.status(401).json({
-                message:
-                    'There is no account registered with the provided username',
+                errors: [
+                    {
+                        msg: 'There is no account registered with the provided username.',
+                        param: 'username',
+                        value: username,
+                        location: 'body',
+                    },
+                ],
             });
         }
 
@@ -109,7 +115,14 @@ export const user_login = [
                 });
             } else {
                 return res.status(401).json({
-                    message: 'Password is incorrect',
+                    errors: [
+                        {
+                            msg: 'Password is incorrect.',
+                            param: 'password',
+                            value: password,
+                            location: 'body',
+                        },
+                    ],
                 });
             }
         });
