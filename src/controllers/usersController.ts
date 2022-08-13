@@ -31,6 +31,18 @@ const isValidUser: CustomValidator = async (username: string) => {
     });
 };
 
+const validateErrors = (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            errors: errors.array(),
+        });
+    }
+
+    next();
+};
+
 export const user_register = [
     body('username', 'Username must not be empty.')
         .trim()
@@ -41,16 +53,9 @@ export const user_register = [
         .trim()
         .isLength({ min: 8 })
         .escape(),
+    validateErrors,
 
     (req: Request, res: Response, next: NextFunction) => {
-        const errors = validationResult(req);
-
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array(),
-            });
-        }
-
         const { username, password }: AccessBody = req.body;
 
         const user = new User({ username, password });
@@ -63,41 +68,53 @@ export const user_register = [
     },
 ];
 
-export async function user_login(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) {
-    const { username, password }: AccessBody = req.body;
+export const user_login = [
+    body('username', 'Username must not be empty.')
+        .trim()
+        .isLength({ min: 1 })
+        .escape(),
+    body('password', 'Password must be 8 characters or more.')
+        .trim()
+        .isLength({ min: 8 })
+        .escape(),
+    validateErrors,
 
-    const userExists = await User.exists({ username });
+    async (req: Request, res: Response, next: NextFunction) => {
+        const { username, password }: AccessBody = req.body;
 
-    if (!userExists) {
-        return res.status(401).json({
-            message:
-                'There is no account registered with the provided username',
-        });
-    }
+        const userExists = await User.exists({ username });
 
-    // Check if username, password match
-    User.findOne({ username }, {}, {}, async (err, user) => {
-        if (err) return next(err);
-
-        if (await user?.comparePassword(password)) {
-            const token = jwt.sign({ id: user?._id }, process.env.SECRET_KEY, {
-                expiresIn: process.env.JWT_EXPIRES_IN,
-            });
-
-            return res.json({
-                token,
-            });
-        } else {
+        if (!userExists) {
             return res.status(401).json({
-                message: 'Password is incorrect',
+                message:
+                    'There is no account registered with the provided username',
             });
         }
-    });
-}
+
+        // Check if username, password match
+        User.findOne({ username }, {}, {}, async (err, user) => {
+            if (err) return next(err);
+
+            if (await user?.comparePassword(password)) {
+                const token = jwt.sign(
+                    { id: user?._id },
+                    process.env.SECRET_KEY,
+                    {
+                        expiresIn: process.env.JWT_EXPIRES_IN,
+                    },
+                );
+
+                return res.json({
+                    token,
+                });
+            } else {
+                return res.status(401).json({
+                    message: 'Password is incorrect',
+                });
+            }
+        });
+    },
+];
 
 export function user_get(req: Request, res: Response) {
     res.json({
