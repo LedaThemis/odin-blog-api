@@ -144,7 +144,9 @@ export const post_update = [
 
             // Update post
             if (req.user?.id.toString() === post.author.toString()) {
-                const updatedPost = await post.save();
+                const updatedPost = await (
+                    await post.save()
+                ).populate('author');
 
                 return res.json({
                     state: 'success',
