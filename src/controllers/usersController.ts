@@ -102,7 +102,7 @@ export const user_login = [
             if (err) return next(err);
 
             if (await user?.comparePassword(password)) {
-                const token = jwt.sign(
+                const token: string = jwt.sign(
                     { id: user?._id },
                     process.env.SECRET_KEY,
                     {
@@ -112,6 +112,8 @@ export const user_login = [
 
                 return res.json({
                     token,
+                    expiresIn: process.env.JWT_EXPIRES_IN,
+                    userId: user?._id,
                 });
             } else {
                 return res.status(401).json({
@@ -152,14 +154,6 @@ export const user_posts_get = [
                     }
 
                     let posts;
-
-                    console.log({ postsAuthor, currentUser });
-                    console.log({
-                        bool:
-                            currentUser &&
-                            currentUser.id.toString() ===
-                                postsAuthor._id.toString(),
-                    });
 
                     if (
                         currentUser &&
