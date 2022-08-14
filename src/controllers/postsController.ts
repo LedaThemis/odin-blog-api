@@ -19,6 +19,7 @@ const validateErrors = (req: Request, res: Response, next: NextFunction) => {
 
     if (!errors.isEmpty()) {
         return res.status(400).json({
+            state: 'failed',
             errors: errors.array(),
         });
     }
@@ -48,6 +49,7 @@ export const post_create = [
             if (err) return next(err);
 
             return res.status(200).json({
+                state: 'success',
                 post: savedPost,
             });
         });
@@ -90,6 +92,7 @@ export const post_get = [
                     return res.sendStatus(404);
                 } else {
                     return res.json({
+                        state: 'success',
                         post,
                     });
                 }
@@ -144,6 +147,7 @@ export const post_update = [
                 const updatedPost = await post.save();
 
                 return res.json({
+                    state: 'success',
                     post: updatedPost,
                 });
             } else if (post.isPublished) {
@@ -265,6 +269,7 @@ export const post_comment_create = [
                 await post.save();
 
                 return res.json({
+                    state: 'success',
                     comment: savedComment,
                 });
             } else {

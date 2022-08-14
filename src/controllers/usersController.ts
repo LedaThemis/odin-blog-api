@@ -36,6 +36,7 @@ const validateErrors = (req: Request, res: Response, next: NextFunction) => {
 
     if (!errors.isEmpty()) {
         return res.status(400).json({
+            state: 'failed',
             errors: errors.array(),
         });
     }
@@ -86,6 +87,7 @@ export const user_login = [
 
         if (!userExists) {
             return res.status(401).json({
+                state: 'failed',
                 errors: [
                     {
                         msg: 'There is no account registered with the provided username.',
@@ -111,12 +113,14 @@ export const user_login = [
                 );
 
                 return res.json({
+                    state: 'success',
                     token,
                     expiresIn: process.env.JWT_EXPIRES_IN,
                     userId: user?._id,
                 });
             } else {
                 return res.status(401).json({
+                    state: 'failed',
                     errors: [
                         {
                             msg: 'Password is incorrect.',
@@ -132,8 +136,27 @@ export const user_login = [
 ];
 
 export function user_get(req: Request, res: Response) {
-    res.json({
-        message: 'NOT IMPLEMENTED',
+    User.findById(req.params.userId).then((user) => {
+        if (!user) {
+            return res.json({
+                errors: [
+                    {
+                        msg: 'User does not exist.',
+                        param: 'userId',
+                        value: req.params.userId,
+                        location: 'params',
+                    },
+                ],
+            });
+        }
+
+        return res.json({
+            user: {
+                _id: user._id,
+                username: user.username,
+                __v: user.__v,
+            },
+        });
     });
 }
 
@@ -161,15 +184,16 @@ export const user_posts_get = [
                     ) {
                         posts = await Post.find({
                             author: postsAuthor?._id,
-                        });
+                        }).populate('author', 'username');
                     } else {
                         posts = await Post.find({
                             author: postsAuthor?._id,
                             isPublished: true,
-                        });
+                        }).populate('author', 'username');
                     }
 
                     return res.json({
+                        state: 'success',
                         posts,
                     });
                 } catch (err) {

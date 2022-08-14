@@ -19,6 +19,7 @@ const validateErrors = (req: Request, res: Response, next: NextFunction) => {
 
     if (!errors.isEmpty()) {
         return res.status(400).json({
+            state: 'failed',
             errors: errors.array(),
         });
     }
