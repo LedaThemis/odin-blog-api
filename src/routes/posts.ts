@@ -5,7 +5,7 @@ import * as postsController from '../controllers/postsController';
 const router = Router();
 
 // Create post
-router.post('/:postId', postsController.post_create);
+router.post('/', postsController.post_create);
 
 // Get post
 router.get('/:postId', postsController.post_get);
