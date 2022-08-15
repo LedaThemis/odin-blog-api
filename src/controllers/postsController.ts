@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { body, validationResult } from 'express-validator';
+import { CustomSanitizer, body, validationResult } from 'express-validator';
 import { Types } from 'mongoose';
 import passport from 'passport';
+import sanitize from 'sanitize-html';
 
 import Comment from '../models/comment';
 import Post from '../models/post';
@@ -27,6 +28,12 @@ const validateErrors = (req: Request, res: Response, next: NextFunction) => {
     next();
 };
 
+const sanitizeHtml: CustomSanitizer = (input: string) => {
+    return sanitize(input, {
+        disallowedTagsMode: 'escape',
+    });
+};
+
 export const post_create = [
     passport.authenticate('jwt', { session: false }),
     body('title', 'Title must not be empty.')
@@ -36,7 +43,7 @@ export const post_create = [
     body('content', 'Content must be 32 characters or more.')
         .trim()
         .isLength({ min: 32 })
-        .escape(),
+        .customSanitizer(sanitizeHtml),
     validateErrors,
     async (req: Request, res: Response, next: NextFunction) => {
         const post = new Post({
@@ -113,7 +120,7 @@ export const post_update = [
         .optional()
         .trim()
         .isLength({ min: 32 })
-        .escape(),
+        .customSanitizer(sanitizeHtml),
     body('isPublished', 'isPublished must be either true or false')
         .optional()
         .custom((value) => value === 'true' || value === 'false')
