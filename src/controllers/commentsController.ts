@@ -54,13 +54,23 @@ export const comment_update = [
                     comment.content = req.body.content;
                 }
 
-                const updatedComment = await comment.save();
+                const updatedComment = await (
+                    await comment.save()
+                ).populate('author', 'username');
 
                 return res.json({
+                    state: 'success',
                     comment: updatedComment,
                 });
             } else {
-                return res.sendStatus(403);
+                return res.json({
+                    state: 'failed',
+                    errors: [
+                        {
+                            msg: 'Forbidden.',
+                        },
+                    ],
+                });
             }
         } catch (err) {
             return next(err);
