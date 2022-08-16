@@ -233,7 +233,10 @@ export const post_comments_get = [
                     ) {
                         const comments = await Promise.all(
                             post.comments.map((commentId) =>
-                                Comment.findById(commentId).populate('author', 'username'),
+                                Comment.findById(commentId).populate(
+                                    'author',
+                                    'username',
+                                ),
                             ),
                         );
 
@@ -272,7 +275,14 @@ export const post_comment_create = [
             const post = await Post.findById(req.params.postId);
 
             if (!post) {
-                return res.sendStatus(404);
+                return res.json({
+                    state: 'failed',
+                    errors: [
+                        {
+                            msg: 'Post not found.',
+                        },
+                    ],
+                });
             }
 
             if (
@@ -284,7 +294,9 @@ export const post_comment_create = [
                     content: req.body.content,
                 });
 
-                const savedComment = await comment.save();
+                const savedComment = await (
+                    await comment.save()
+                ).populate('author', 'username');
 
                 post.comments.push(savedComment._id);
 
@@ -295,7 +307,14 @@ export const post_comment_create = [
                     comment: savedComment,
                 });
             } else {
-                return res.sendStatus(404);
+                return res.json({
+                    state: 'failed',
+                    errors: [
+                        {
+                            msg: 'Post not found.',
+                        },
+                    ],
+                });
             }
         } catch (err) {
             return next(err);
