@@ -233,11 +233,12 @@ export const post_comments_get = [
                     ) {
                         const comments = await Promise.all(
                             post.comments.map((commentId) =>
-                                Comment.findById(commentId),
+                                Comment.findById(commentId).populate('author', 'username'),
                             ),
                         );
 
                         return res.json({
+                            state: 'success',
                             comments,
                         });
                     } else {

@@ -9,7 +9,7 @@ interface IComment {
 
 const commentSchema = new Schema<IComment>(
     {
-        author: { type: Schema.Types.ObjectId, required: true },
+        author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         content: { type: String, required: true },
     },
     {
