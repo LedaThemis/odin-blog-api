@@ -74,6 +74,7 @@ export const post_get = [
 
                 const post = await Post.findById(req.params.postId).populate(
                     'author',
+                    'username',
                 );
 
                 if (!post) {
