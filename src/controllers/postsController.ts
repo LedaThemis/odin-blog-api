@@ -72,35 +72,39 @@ export const post_get = [
             async (err, currentUser) => {
                 if (err) return next(err);
 
-                let post;
-
-                // No current user
-                if (!currentUser) {
-                    try {
-                        post = await Post.findOne({
-                            _id: req.params.postId,
-                            isPublished: true,
-                        });
-                    } catch (err) {
-                        return next(err);
-                    }
-                } else {
-                    try {
-                        post = await Post.findOne({
-                            _id: req.params.postId,
-                            author: currentUser?.id,
-                        });
-                    } catch (err) {
-                        return next(err);
-                    }
-                }
+                const post = await Post.findById(req.params.postId).populate(
+                    'author',
+                );
 
                 if (!post) {
-                    return res.sendStatus(404);
-                } else {
+                    return res.json({
+                        state: 'failed',
+                        errors: [
+                            {
+                                msg: 'Post not found.',
+                            },
+                        ],
+                    });
+                }
+
+                if (
+                    post?.isPublished ||
+                    (currentUser &&
+                        post?.author._id.toString() ===
+                            currentUser.id.toString())
+                ) {
                     return res.json({
                         state: 'success',
                         post,
+                    });
+                } else {
+                    return res.json({
+                        state: 'failed',
+                        errors: [
+                            {
+                                msg: 'Post not found.',
+                            },
+                        ],
                     });
                 }
             },
