@@ -241,7 +241,14 @@ export const post_comments_get = [
                             comments,
                         });
                     } else {
-                        return res.sendStatus(404);
+                        return res.json({
+                            state: 'failed',
+                            errors: [
+                                {
+                                    msg: 'Post not found.',
+                                },
+                            ],
+                        });
                     }
                 } catch (err) {
                     return next(err);
