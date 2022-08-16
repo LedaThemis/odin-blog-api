@@ -4,6 +4,7 @@ import { Types } from 'mongoose';
 import passport from 'passport';
 
 import Comment from '../models/comment';
+import Post from '../models/post';
 import User from '../models/user';
 
 const validCommentId = (req: Request, res: Response, next: NextFunction) => {
@@ -84,11 +85,26 @@ export const comment_delete = [
                 req.user?.id.toString() === comment.author.toString() ||
                 (currentUser && currentUser.isAdmin)
             ) {
+                const post = await Post.findOne({ comments: comment._id });
+
+                if (post) {
+                    post.comments = post?.comments.filter(
+                        (c) => c._id.toString() !== comment._id.toString(),
+                    );
+
+                    await post.save();
+                }
+
                 await comment.deleteOne();
 
-                return res.sendStatus(200);
+                return res.json({
+                    state: 'success',
+                });
             } else {
-                return res.sendStatus(403);
+                return res.json({
+                    state: 'failed',
+                    errors: [{ msg: 'Forbidden.' }],
+                });
             }
         } catch (err) {
             return next(err);
