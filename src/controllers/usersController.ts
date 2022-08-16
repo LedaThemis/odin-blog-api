@@ -64,7 +64,9 @@ export const user_register = [
         user.save((err) => {
             if (err) return next(err);
 
-            return res.sendStatus(200);
+            return res.json({
+                state: 'success',
+            });
         });
     },
 ];
