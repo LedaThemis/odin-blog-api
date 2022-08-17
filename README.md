@@ -4,3 +4,9 @@ Technologies used:
 
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+
+## Related Repositories
+
+-   [Consumer View](https://github.com/ledaThemis/odin-blog)
+-   [CMS](https://github.com/ledaThemis/odin-blog-cms)
+-   [API Library](https://github.com/ledaThemis/odin-blog-library)
