@@ -137,30 +137,33 @@ export const user_login = [
     },
 ];
 
-export function user_get(req: Request, res: Response) {
-    User.findById(req.params.userId).then((user) => {
-        if (!user) {
-            return res.json({
-                errors: [
-                    {
-                        msg: 'User does not exist.',
-                        param: 'userId',
-                        value: req.params.userId,
-                        location: 'params',
-                    },
-                ],
-            });
-        }
+export const user_get = [
+    validUserId,
+    (req: Request, res: Response) => {
+        User.findById(req.params.userId).then((user) => {
+            if (!user) {
+                return res.json({
+                    errors: [
+                        {
+                            msg: 'User does not exist.',
+                            param: 'userId',
+                            value: req.params.userId,
+                            location: 'params',
+                        },
+                    ],
+                });
+            }
 
-        return res.json({
-            user: {
-                _id: user._id,
-                username: user.username,
-                __v: user.__v,
-            },
+            return res.json({
+                user: {
+                    _id: user._id,
+                    username: user.username,
+                    __v: user.__v,
+                },
+            });
         });
-    });
-}
+    },
+];
 
 export const user_posts_get = [
     validUserId,
