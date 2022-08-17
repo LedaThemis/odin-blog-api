@@ -1,4 +1,5 @@
 import compression from 'compression';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import helmet from 'helmet';
@@ -24,6 +25,9 @@ const app = express();
 
 // Passport
 passport.use(jwtStrategy);
+
+app.use(cors());
+app.options('*', cors);
 
 // Middleware
 app.use(helmet());
