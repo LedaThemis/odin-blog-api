@@ -23,11 +23,11 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // Express
 const app = express();
 
+// CORS
+app.use(cors());
+
 // Passport
 passport.use(jwtStrategy);
-
-app.use(cors());
-app.options('*', cors);
 
 // Middleware
 app.use(helmet());
